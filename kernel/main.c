@@ -7,9 +7,9 @@ void main(void){
 	init_all();
 	//asm volatile("sti");
 	put_str("time to assert\n");
-	ASSERT(1 == 3);
 	while(1);
 }
 
+//
 //
 

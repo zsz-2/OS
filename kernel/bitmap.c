@@ -10,10 +10,10 @@ void bitmap_init(struct bitmap *btmp){
 }
 
 /*判断bit_indx位是否为1，若为1，则返回true，否则返回false*/
-bool bitmap_scan_test(struct bitmap *btmp, uint32_t bit_idx){
+int bitmap_scan_test(struct bitmap *btmp, uint32_t bit_idx){
 	uint32_t byte_idx = bit_idx / 8;
 	uint32_t bit_odd =bit_idx % 8;
-	return (btmp->bits[byte_idx]) & (BITMAP_MASK << bit_odd);
+	return (btmp->bits[byte_idx]) & (BITMAP_MASK << bit_odd) == 0 ? 0 : 1;
 }
 
 /*在位图连续申请cnt个位，成功，则返回其起始位下标，失败，返回-1*/
@@ -23,7 +23,7 @@ int bitmap_scan(struct bitmap *btmp, uint32_t cnt){
 	
 	//找不到空闲位的处理方式
 	ASSERT(idx_byte < btmp->btmp_bytes_len);
-	if(idxi_byte == btmp->btmp_bytes_len) return -1;
+	if(idx_byte == btmp->btmp_bytes_len) return -1;
 
 	//找到字节中的第一个空闲位
 	int idx_bit = 0;
@@ -38,6 +38,7 @@ int bitmap_scan(struct bitmap *btmp, uint32_t cnt){
 	uint32_t next_bit = bit_idx_start + 1;
 	
 	bit_idx_start = -1; //找不到连续的位，直接将-1返回
+	uint32_t count = 0;
 
 	while(bit_left-- > 0){
 		if(!(bitmap_scan_test(btmp,next_bit)) ){

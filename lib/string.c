@@ -5,7 +5,7 @@
 
 void memset(void *dst_, uint8_t value, uint32_t size);
 void memcpy(void *dst_, const void *src_, uint32_t size);
-int memcpy(const void *a_,  const void *b_, uint32_t size);
+int memcmp(const void *a_,  const void *b_, uint32_t size);
 char *strcpy(char *dst_, const char *src_);
 uint32_t strlen(const char *str);
 int8_t strcmp(const char *a,const char *b);
@@ -15,9 +15,11 @@ char *strcat(char *dst_,const char *src_);
 uint32_t strchrs(const char *str, uint8_t ch);
 
 
+#define NULL 0
+
 /*将dst起始的size字节设置为value*/
 void memset(void *dst_, uint8_t value, uint32_t size){
-	ASSERT (dst != NULL);
+	ASSERT (dst_ != NULL);
 	uint8_t *dst = dst_;
 	while(size-- > 0){
 		*dst++ = value; 
@@ -35,7 +37,7 @@ void memcpy(void *dst_, const void *src_, uint32_t size){
 }
 
 /*连续比较以地址a_和地址b_开头的size个字节，相等返回0，大于返回1，小于返回-1*/
-int memcpy(const void *a_,  const void *b_, uint32_t size){
+int memcmp(const void *a_,  const void *b_, uint32_t size){
 	const char * a = a_, *b = b_;
 	ASSERT(a != NULL && b != NULL);
 	while(size-- > 0){
