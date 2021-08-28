@@ -13,7 +13,7 @@ void bitmap_init(struct bitmap *btmp){
 int bitmap_scan_test(struct bitmap *btmp, uint32_t bit_idx){
 	uint32_t byte_idx = bit_idx / 8;
 	uint32_t bit_odd =bit_idx % 8;
-	return (btmp->bits[byte_idx]) & (BITMAP_MASK << bit_odd) == 0 ? 0 : 1;
+	return ((btmp->bits[byte_idx]) & (BITMAP_MASK << bit_odd)) == 0 ? 0 : 1;
 }
 
 /*在位图连续申请cnt个位，成功，则返回其起始位下标，失败，返回-1*/
@@ -38,10 +38,10 @@ int bitmap_scan(struct bitmap *btmp, uint32_t cnt){
 	uint32_t next_bit = bit_idx_start + 1;
 	
 	bit_idx_start = -1; //找不到连续的位，直接将-1返回
-	uint32_t count = 0;
+	uint32_t count = 1;
 
 	while(bit_left-- > 0){
-		if(!(bitmap_scan_test(btmp,next_bit)) ){
+		if(bitmap_scan_test(btmp,next_bit) == 0 ){
 			++count;
 		}else {
 			count = 0;

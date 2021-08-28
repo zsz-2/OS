@@ -78,9 +78,26 @@ static void general_intr_handler(uint8_t vec_nr){
 	if(vec_nr == 0x27 || vec_nr == 0x2f){
 		return;
 	}
-	put_str("int vector: 0x");
-	put_int(vec_nr);
-	put_char('\n');
+
+	/*将光标设置为0，在屏幕左上角清出一片信息*/
+	set_coordinate(0);
+	int current_pos = 0;
+	while(current_pos < 320){
+		put_char(' ');
+		++current_pos;
+	}
+	set_coordinate(0);
+	put_str("!!!!!!!!!!    excetion message begin   !!!!!!!!!!!\n");
+	put_str(intr_name[vec_nr]);
+	
+	if(vec_nr == 14){
+		int page_fault_vaddr = 0;
+		asm volatile ("movl %%cr2,%0 ":"=r"(page_fault_vaddr));
+		put_str("\npage fault addr is: ");
+		put_int(page_fault_vaddr);
+	}
+	put_str("\n!!!!!!!!!!!!!      excetion message end    !!!!!!!!!!!!\n");
+	while(1); //此时中断已经关闭
 }
 
 
@@ -113,6 +130,12 @@ static void exception_init(void){
 	intr_name[18] = "#MC Machine-Check Exception";
 	intr_name[19] = "#XF SIMD Floating-Point Exception";
 }
+
+/*在中断处理程序数组第vector_no注册安装中断处理程序function*/
+void register_handler(uint8_t vector_no, intr_handler function){
+	idt_table[vector_no] = function;
+}
+
 
 /*关于中断的初始化工作*/
 void idt_init(){

@@ -1,4 +1,5 @@
 #include "memory.h"
+#include "interrupt.h"
 #include "stdint.h"
 #include "print.h"
 #include "bitmap.h"
@@ -7,6 +8,7 @@
 #include "string.h"
 
 #define PG_SIZE 4096
+#define NULL 0
 
 /*********************************位图地址***********************************
  * 因为0xc009f000是内核线程的栈顶，0xc0009e000是内核主线程的pcb
@@ -46,7 +48,7 @@ static void mem_pool_init(uint32_t all_mem){
 
 	uint16_t kernel_free_pages = all_free_pages / 2;
 	uint16_t user_free_pages = all_free_pages - kernel_free_pages;
-
+	
 	/*为了简化操作，内存不再处理*/
 	uint32_t kbm_length  = kernel_free_pages / 8;
 	uint32_t ubm_length = user_free_pages / 8;
@@ -107,6 +109,8 @@ void mem_init(){
 	put_str("mem_init  start\n");
 	uint32_t mem_bytes_total = (*(uint32_t *)(0xb06));
 	mem_pool_init(mem_bytes_total); //初始化内存池
+	//intr_enable();
+	//while(1);
 	put_str("mem_init  done\n");
 }
 
@@ -131,6 +135,7 @@ static void *vaddr_get(enum pool_flags pf, uint32_t pg_cnt){
 }
 
 /*得到虚拟地址vaddr对应的pte指针*/
+//只是根据虚拟地址转换规则计算出来vaddr相应的pte及pde地址，与其是否存在无关
 uint32_t *pte_ptr(uint32_t vaddr){
 	/*先访问到页表自己，再用页目录项pde作为pte的索引访问到页表*/
 	uint32_t *pte = (uint32_t *)(0xffc00000 + ((vaddr & 0xffc00000) >> 10 ) + PTE_IDX(vaddr) * 4);
@@ -147,10 +152,77 @@ uint32_t *pde_ptr(uint32_t vaddr){
 static void *palloc(struct pool *m_pool){
 	/*扫描设置位图要保证原子操作*/
 	int bit_idx = bitmap_scan(&m_pool->pool_bitmap, 1); //找一个物理页面
-	if(bit_dix == -1){
+	if(bit_idx == -1){
 		return NULL;
 	}
 	bitmap_set(&m_pool->pool_bitmap, bit_idx, 1);
 	uint32_t page_phyaddr = ((bit_idx * PG_SIZE ) + m_pool->phy_addr_start);
 	return (void *)page_phyaddr;
+}
+
+/*页表中添加虚拟地址和物理地址的映射*/
+static void page_table_add(void *_vaddr, void *_page_phyaddr){
+	uint32_t vaddr = (uint32_t)_vaddr, page_phyaddr = (uint32_t)_page_phyaddr;
+	uint32_t *pde = pde_ptr(vaddr);
+	uint32_t *pte = pte_ptr(vaddr);
+/*****************************************************************
+ * 执行*pte，会访问到空的pde。所以确保pde创建完成之后才能执行*pte
+ * 否则会引发page_fault.
+ * *pte只能 出现在*pde后面***************************************
+ ****************************************************************/
+	//现在页目录内判断目录项的P位，若为1，则该表已存在
+	if(*pde & 0x00000001){
+		ASSERT(!(*pte & 0x00000001));
+		//应在不存在页表时创建页表
+		if(!(*pte & 0x00000001)){
+			*pte = (page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
+		}else{
+			PANIC("pte repeat");
+			*pte = (page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
+		}
+	}else{	//页目录项不存在
+		uint32_t pde_phyaddr = (uint32_t)palloc(&kernel_pool);
+		*pde = (pde_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
+		/*分配到的页表地址应该被清0，防止旧数据成了页表项，让页表项混乱*/
+		memset((void *)((int)pte & 0xfffff000), 0, PG_SIZE );
+		ASSERT(!(*pte & 0x00000001));
+		*pte = (page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
+	}
+}
+
+/*分配pg_cnt个页空间，成功则返回虚拟地址，失败返回NULL*/
+void *malloc_page(enum pool_flags pf, uint32_t pg_cnt){
+	ASSERT(pg_cnt > 0 && pg_cnt < 3840);
+	/************************malloc_page原理)*******************************
+	 * 1.通过vaddr_get获得相应的虚拟地址************************************
+	 * 2.通过palloc在物理内存池中获得物理页*********************************
+	 * 3.通过table_page_add将得到的虚拟地址和物理地址在页表完成映射*********
+	 * ********************************************************************/
+	void *vaddr_start = vaddr_get(pf, pg_cnt);
+	if(vaddr_start == NULL) return NULL;
+
+	uint32_t vaddr = (uint32_t)vaddr_start, cnt = pg_cnt;
+	struct pool *mem_pool = pf & PF_KERNEL ? &kernel_pool : &mem_pool;
+	
+	/*虚拟地址是连续的，物理地址可能不是，所以做逐个映射*/
+	while(cnt-- > 0){
+		void *page_phyaddr = palloc(mem_pool);
+		if(page_phyaddr == NULL){
+			//pass 物理页需要全部回滚
+			return NULL;
+		}
+		page_table_add((void*)vaddr, page_phyaddr);
+		vaddr += PG_SIZE;
+	}
+	return vaddr_start;
+}
+
+
+/*从内核内存池申请1页内存*/
+void *get_kernel_pages(uint32_t pg_cnt){
+	void *vaddr = malloc_page(PF_KERNEL, pg_cnt);
+	if(vaddr != NULL){
+		memset(vaddr, 0, pg_cnt * PG_SIZE);
+	}
+	return vaddr;
 }

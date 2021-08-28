@@ -189,8 +189,6 @@ cls:
 	add ebx,2
 	loop cls
 	mov bx,1920
-
-
 set_cursor:
 	mov dx,0x03d4
 	mov al,0x0e
