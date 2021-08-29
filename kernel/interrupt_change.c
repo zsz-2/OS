@@ -4,7 +4,7 @@
 #include "global.h"
 #include "io.h"
 
-#define IDT_DESC_CNT 0x21
+#define IDT_DESC_CNT 0x30
 
 
 #define EFLAGS_IF 0x00000200
@@ -67,7 +67,7 @@ static void pic_init(void){
 	outb(PIC_S_DATA,0x01); //ICW4：非自动EOI，8086模式
 
 	//只打开时钟中断
-	outb(PIC_M_DATA,0xfe);
+	outb(PIC_M_DATA,0xfc);
 	outb(PIC_S_DATA,0xff);
 	put_str("  pic_init done\n");
 }
