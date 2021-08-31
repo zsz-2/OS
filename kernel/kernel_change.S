@@ -11,8 +11,8 @@ extern idt_table ;idt_table是存储中断处理程序的数组
 section .data
 intr_str: db "interrupt occur!",0xa,0
 intr_str1: db "nononono!",0xa,0
-global intr_entry_table
 
+global intr_entry_table
 intr_entry_table:
 %macro VECTOR 2
 section .text
@@ -32,6 +32,9 @@ intr%1entry:
 	out 0x20,al
 	out 0xa0,al
 	
+	;push intr_str
+	;call put_str
+	;add esp,4	
 
 	push %1  ;将中断号压入栈中
 	call [idt_table + %1 * 4]
@@ -101,4 +104,33 @@ VECTOR 0x2c,ZERO ;ps/2鼠标
 VECTOR 0X2d,ZERO ;fpu浮点单元异常
 VECTOR 0x2e,ZERO ;硬盘
 VECTOR 0x2f,ZERO ;保留
+
+
+
+extern syscall_table
+section .text
+global syscall_handler
+syscall_handler:
+        ;1 保存上下文的环境
+        push 0 
+        push ds
+        push es
+        push fs
+        push gs
+        pushad
+
+
+        push 0x80  ;此位置压入0x80也是为了保持统一的格式
+
+        ;为系统调用提供参数
+        push edx  ;第三个参数
+        push ecx  ;第二个参数
+        push ebx  ;第一个参数
+        ;调用子功能处理函数
+        call [syscall_table + eax * 4]
+        add esp,12  ;跨过上面的参数
+
+        mov [esp + 8 *4], eax
+        jmp intr_exit
+
 

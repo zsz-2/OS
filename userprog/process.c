@@ -14,7 +14,7 @@ extern struct list thread_all_list; //所有任务队列
 /*构建用户进程初始上下文信息*/
 void start_process(void *filename_){
 	
-	intr_enable();
+
 	void *function = filename_;
 	struct task_struct *cur = running_thread();
 	cur->self_kstack += sizeof(struct thread_stack);
@@ -28,10 +28,12 @@ void start_process(void *filename_){
 		proc_stack->fs = SELECTOR_U_DATA;
 	proc_stack->eip = function;
 	proc_stack->cs =  SELECTOR_U_CODE;
-	proc_stack->eflags = (EFLAGS_IOPL_0 | EFLAGS_MBS | EFLAGS_IF_1);
+	proc_stack->eflags = (EFLAGS_IOPL_3 | EFLAGS_MBS | EFLAGS_IF_1);
 	proc_stack->esp = (void *)((uint32_t)get_a_page(PF_USER, USER_STACK3_VADDR) + PG_SIZE);
+
 	proc_stack->ss = SELECTOR_U_DATA;
-//	put_str("error\n");
+
+
 	//while(1);
 	asm volatile("movl %0, %%esp; jmp intr_exit" \
 			::"g"(proc_stack):"memory");
@@ -96,7 +98,10 @@ uint32_t *create_page_dir(void){
 /*创建用户进程虚拟地址位图*/
 void create_user_vaddr_bitmap(struct task_struct *user_prog){
 	user_prog->userprog_vaddr.vaddr_start = USER_VADDR_START;
-	uint32_t bitmap_pg_cnt = DIV_ROUND_UP((0xc0000000 - USER_VADDR_START)/PG_SIZE  /8 ,PG_SIZE);
+	uint32_t bitmap_pg_cnt = DIV_ROUND_UP((0xc0000000 - USER_VADDR_START)/ PG_SIZE  /8 ,PG_SIZE);
+	put_str("create_user_vaddr:  ");
+	put_int(bitmap_pg_cnt);
+	put_str("\n");
 	user_prog->userprog_vaddr.vaddr_bitmap.bits = get_kernel_pages(bitmap_pg_cnt);
 	user_prog->userprog_vaddr.vaddr_bitmap.btmp_bytes_len = (0xc0000000 - USER_VADDR_START) /PG_SIZE / 8;
 	bitmap_init(&user_prog->userprog_vaddr.vaddr_bitmap);

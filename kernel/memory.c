@@ -269,7 +269,6 @@ void *get_a_page(enum pool_flags pf, uint32_t vaddr){
 	/*将虚拟地址对应的位图置1*/
 	struct task_struct *cur = running_thread();
 	int32_t bit_idx = -1;
-
 	/*若当前用户进程申请内存，就修改用户自己的虚拟地址位图*/
 	if(cur->pgdir != NULL && pf == PF_USER){
 		bit_idx = (vaddr - cur->userprog_vaddr.vaddr_start) / PG_SIZE;
@@ -282,7 +281,7 @@ void *get_a_page(enum pool_flags pf, uint32_t vaddr){
 	}else{
 		PANIC("get_a_page: not allow kernel alloc userspace or user alloc kernelspace by get_a_page");
 	}
-		
+
 	void *page_phyaddr = palloc(mem_pool);
 	if(page_phyaddr == NULL){
 		return NULL;
