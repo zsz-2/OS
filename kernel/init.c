@@ -15,6 +15,7 @@ void init_all(){
 	thread_init();
 	console_init();
 	keyboard_init();
+	tss_init();
 }
 
 

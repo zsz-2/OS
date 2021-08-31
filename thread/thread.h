@@ -1,8 +1,17 @@
 #ifndef __THREAD_THREAD_H
 #define __THREAD_THREAD_H
-#include "list.h"
+#include "thread.h"
+#include "userprog.h"
 #include "debug.h"
+#include "interrupt.h"
 #include "stdint.h"
+#include "string.h"
+#include "global.h"
+#include "memory.h"
+#include "list.h"
+
+
+#define PG_SIZE 4096
 
 /*自定义通用函数类型，在很多线程函数中当作形参类型*/
 typedef void thread_func(void *);
@@ -77,8 +86,9 @@ struct task_struct{
 	uint32_t elapsed_ticks;//从任务执行之后，占用了多少滴答数
 	struct list_elem general_tag;  //general_tag的作用是在一般队列上的结点
 	struct list_elem all_list_tag; //线程被加入全部线程队列时使用
-	uint32_t *pgdir;
+	uint32_t *pgdir; //进程自己页表的虚拟地址
 	char name[16];
+	struct virtual_addr userprog_vaddr;  //用户进程的虚拟地址
 	uint32_t stack_magic;
 };
 

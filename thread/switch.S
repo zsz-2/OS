@@ -18,5 +18,6 @@ switch_to:
 	pop ebx
 	pop edx
 	pop esi
+	;jmp $
 	ret
 	

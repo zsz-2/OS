@@ -5,7 +5,7 @@ ENTRY_POINT = 0xc0001500
 AS = nasm
 CC = gcc
 LD = ld
-LIB = -I ./lib -I ./lib/kernel -I ./lib/user -I ./device  -I ./kernel -I ./thread
+LIB = -I ./lib -I ./lib/kernel -I ./lib/user -I ./device  -I ./kernel -I ./thread -I ./userprog
 ASFLAGS = -f elf
 CFLAGS = -Wall $(LIB) -m32 -c -fno-builtin -W -Wstrict-prototypes \
 	-Wmissing-prototypes -fno-stack-protector 
@@ -15,7 +15,8 @@ OBJS = $(BUILD_DIR)/main.o  $(BUILD_DIR)/init.o $(BUILD_DIR)/interrupt.o \
 	$(BUILD_DIR)/debug.o $(BUILD_DIR)/memory.o $(BUILD_DIR)/bitmap.o \
 	$(BUILD_DIR)/string.o $(BUILD_DIR)/thread.o  $(BUILD_DIR)/list.o \
 	$(BUILD_DIR)/switch.o $(BUILD_DIR)/func_tool.o $(BUILD_DIR)/sync.o\
-	$(BUILD_DIR)/console.o $(BUILD_DIR)/keyboard.o $(BUILD_DIR)/ioqueue.o
+	$(BUILD_DIR)/console.o $(BUILD_DIR)/keyboard.o $(BUILD_DIR)/ioqueue.o\
+	$(BUILD_DIR)/tss.o  $(BUILD_DIR)/process.o
 
 
 #############################  C代码编译 #####################################
@@ -75,6 +76,14 @@ $(BUILD_DIR)/keyboard.o: ./device/keyboard.c  ./device/keyboard.h  ./lib/kernel/
 
 $(BUILD_DIR)/ioqueue.o: ./device/ioqueue.c  ./device/ioqueue.h ./lib/kernel/interrupt.h \
 		./lib/kernel/debug.h ./lib/kernel/global.h
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILD_DIR)/tss.o: ./userprog/tss.c  ./userprog/tss.h  ./lib/kernel/global.h\
+		./lib/stdint.h  ./lib/kernel/io.h
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILD_DIR)/process.o: ./userprog/process.c  ./userprog/tss.h  ./userprog/userprog.h ./lib/kernel/global.h\
+		./lib/stdint.h ./thread/thread.h  ./lib/kernel/list.h  ./lib/kernel/io.h
 	$(CC) $(CFLAGS) $< -o $@
 ############################# 汇编代码编译 ###################################
 $(BUILD_DIR)/print.o: ./kernel/print.S 

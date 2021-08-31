@@ -14,6 +14,7 @@ char *strrchr(const char *str, const uint8_t ch);
 char *strcat(char *dst_,const char *src_);
 uint32_t strchrs(const char *str, uint8_t ch);
 
+#include "print.h"
 
 #define NULL 0
 

@@ -25,4 +25,11 @@ typedef unsigned int uint32_t;
 //无符号64位整数
 typedef unsigned long long int uint64_t;
 
+#define NULL 0
+typedef int bool;
+#define true 1
+#define false 0
+
+#define PG_SIZE 4096
+
 #endif

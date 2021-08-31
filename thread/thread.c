@@ -1,4 +1,5 @@
 #include "thread.h"
+#include "userprog.h"
 #include "debug.h"
 #include "interrupt.h"
 #include "stdint.h"
@@ -115,6 +116,10 @@ void schedule(){
 	thread_tag = list_pop(&thread_ready_list);
 	struct task_struct *next = elem2entry(struct task_struct, general_tag, thread_tag);
 	next->status = TASK_RUNNING;
+
+	/*激活任务页表*/
+	process_activate(next);
+	//put_str("schedule: \n");
 	switch_to(cur, next);
 }
 

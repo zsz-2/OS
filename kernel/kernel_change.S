@@ -5,6 +5,7 @@
 %define ZERO push 0
 
 extern put_str;声明外部函数
+extern put_int;声明外部函数
 extern idt_table ;idt_table是存储中断处理程序的数组
 
 section .data
@@ -34,8 +35,6 @@ intr%1entry:
 
 	push %1  ;将中断号压入栈中
 	call [idt_table + %1 * 4]
-	;push intr_str
-	;call put_str
 	jmp intr_exit
 section .data
 	dd intr%1entry
