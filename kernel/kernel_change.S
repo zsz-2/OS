@@ -106,7 +106,7 @@ VECTOR 0x2e,ZERO ;硬盘
 VECTOR 0x2f,ZERO ;保留
 
 
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;0X80号中断;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 extern syscall_table
 section .text
 global syscall_handler
@@ -134,3 +134,29 @@ syscall_handler:
         jmp intr_exit
 
 
+;[bits 32]
+;extern syscall_table
+;section .text
+;global syscall_handler
+;syscall_handler:
+;	push 0
+;	push ds
+;	push es
+;	push fs
+;	push gs
+;	pushad
+;
+;	push 0x80
+;
+;	mov ebx,[esp + 4 + 48  + 4 + 12]
+;	
+;	push dword [ebx + 12]	
+;	push dword [ebx + 8]	
+;	push dword [ebx + 4]	
+;	mov edx,[ebx]
+;	
+;	call [syscall_table + edx * 4]
+;	add esp,12
+;
+;	mov [esp + 8 *4],eax
+;	jmp intr_exit

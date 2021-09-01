@@ -17,7 +17,7 @@ OBJS = $(BUILD_DIR)/main.o  $(BUILD_DIR)/init.o $(BUILD_DIR)/interrupt.o \
 	$(BUILD_DIR)/switch.o $(BUILD_DIR)/func_tool.o $(BUILD_DIR)/sync.o\
 	$(BUILD_DIR)/console.o $(BUILD_DIR)/keyboard.o $(BUILD_DIR)/ioqueue.o\
 	$(BUILD_DIR)/tss.o  $(BUILD_DIR)/process.o $(BUILD_DIR)/syscall-init.o\
-	$(BUILD_DIR)/syscall.o
+	$(BUILD_DIR)/syscall.o  $(BUILD_DIR)/stdio.o
 
 
 #############################  C代码编译 #####################################
@@ -93,6 +93,9 @@ $(BUILD_DIR)/syscall.o: ./lib/user/syscall.c ./lib/user/syscall.h
 $(BUILD_DIR)/syscall-init.o: ./userprog/syscall-init.c  ./userprog/syscall-init.h  ./thread/thread.h \
 		./lib/stdint.h  ./lib/kernel/global.h  ./lib/kernel/interrupt.h  ./lib/kernel/io.h
 	$(CC) $(CFLAGS) $< -o $@ 
+
+$(BUILD_DIR)/stdio.o: ./lib/stdio.c ./lib/stdio.h  ./lib/string.h  ./lib/user/syscall.h  ./lib/stdint.h
+	$(CC) $(CFLAGS) $< -o $@
 ############################# 汇编代码编译 ###################################
 $(BUILD_DIR)/print.o: ./kernel/print.S 
 	$(AS) $(ASFLAGS) $< -o $@

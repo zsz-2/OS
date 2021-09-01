@@ -1,5 +1,6 @@
 #include "global.h"
 #include "debug.h"
+#include "memory.h"
 #include "userprog.h"
 #include "list.h"
 #include "thread.h"
@@ -32,7 +33,6 @@ void start_process(void *filename_){
 	proc_stack->esp = (void *)((uint32_t)get_a_page(PF_USER, USER_STACK3_VADDR) + PG_SIZE);
 
 	proc_stack->ss = SELECTOR_U_DATA;
-
 
 	//while(1);
 	asm volatile("movl %0, %%esp; jmp intr_exit" \
@@ -116,6 +116,7 @@ void process_execute(void* filename, char *name){
 	create_user_vaddr_bitmap(thread);
 	thread_create(thread, start_process, filename);
 	thread->pgdir = create_page_dir();
+	block_desc_init(thread->u_block_desc);
 
 	enum intr_status old_status = intr_disable();
 	ASSERT(elem_find(&thread_ready_list, &thread->general_tag) == 0);
