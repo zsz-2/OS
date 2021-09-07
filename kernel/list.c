@@ -79,7 +79,7 @@ int elem_find(struct list *plist ,struct list_elem *obj_elem){
 /*查找列表中有没有符合func函数的*/
 struct list_elem *list_traversal(struct list *plist, function func, int arg){
 	struct list_elem *elem = plist->head.next;
-	if(list_empty(plist)) return NULL;
+	if(list_empty(plist) == 1) return NULL;
 	while(elem != &plist->tail){
 		if(func(elem, arg) == 1){
 			return elem;
@@ -91,6 +91,7 @@ struct list_elem *list_traversal(struct list *plist, function func, int arg){
 
 /*返回链表的长度*/
 uint32_t list_len(struct list* plist){
+	if(plist == NULL) return 0;
 	struct list_elem *elem= plist->head.next;
 	uint32_t length = 0;
 	while(elem != &plist->tail){

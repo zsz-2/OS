@@ -13,6 +13,7 @@
 #define NULL 0
 
 struct task_struct *main_thread; //主线程PCB
+struct task_struct *idle_thread; //idle线程
 struct list thread_ready_list; //就绪队列
 struct list thread_all_list; //所有任务队列
 static struct list_elem* thread_tag; //用于保存队列中的线程结点
@@ -110,7 +111,6 @@ static void make_main_thread(void){
 /*实现任务调度*/
 void schedule(){
 	ASSERT(intr_get_status() == INTR_OFF);
-
 	struct task_struct *cur= running_thread();
 	if(cur->status == TASK_RUNNING){
 		//若线程只是CPU时间到了，将其加入就绪队列队尾
@@ -125,7 +125,9 @@ void schedule(){
 	put_str("asssssssssssss:         ");
 	put_int(list_len(&thread_all_list));
 	put_str("\n");*/
-	ASSERT(list_empty(&thread_ready_list) == 0);
+	if(list_empty(&thread_ready_list) == 1){
+		thread_unblock(idle_thread);
+	}
 	thread_tag = NULL;
 	thread_tag = list_pop(&thread_ready_list);
 	struct task_struct *next = elem2entry(struct task_struct, general_tag, thread_tag);
@@ -134,16 +136,8 @@ void schedule(){
 	/*激活任务页表*/
 	process_activate(next);
 	//put_str("schedule: \n");
-	switch_to(cur, next);
-}
 
-void thread_init(){
-	put_str("thread_init  start\n");
-	list_init(&thread_ready_list);
-	list_init(&thread_all_list);
-	lock_init(&pid_lock);
-	make_main_thread();
-	put_str("thread_init done\n");
+	switch_to(cur, next);
 }
 
 
@@ -169,3 +163,33 @@ void thread_unblock(struct task_struct *pthread){
 	}
 	intr_set_status(old_status);
 }
+
+/*thread_yield是主动把CPU使用权让出，让其他线程运行*/
+void thread_yield(void){
+	struct task_struct *cur = running_thread();
+	enum intr_status old_status = intr_disable();
+	ASSERT(elem_find(&thread_ready_list, &cur->general_tag) == 0);
+	list_append(&thread_ready_list, &cur->general_tag);
+	cur->status = TASK_READY;
+	schedule();
+	intr_set_status(old_status);
+}
+
+/*系统空闲时运行的线程*/
+static void idle(void *arg){
+	while(1){
+		thread_block(TASK_BLOCKED);
+		asm volatile("sti; hlt":::"memory");
+	}
+}
+
+void thread_init(){
+	put_str("thread_init  start\n");
+	list_init(&thread_ready_list);
+	list_init(&thread_all_list);
+	lock_init(&pid_lock);
+	make_main_thread();
+	idle_thread = thread_start("idle", 10, idle, NULL);
+	put_str("thread_init done\n");
+}
+

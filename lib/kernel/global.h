@@ -96,4 +96,5 @@ struct gdt_desc{
 #define USER_VADDR_START 0x8048000
 
 #define default_prio 31
+#define UNUSED __attribute__((unused))
 #endif

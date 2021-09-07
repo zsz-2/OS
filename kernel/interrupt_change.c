@@ -70,8 +70,8 @@ static void pic_init(void){
 	outb(PIC_S_DATA,0x01); //ICW4：非自动EOI，8086模式
 
 	//只打开时钟中断
-	outb(PIC_M_DATA,0xfc);
-	outb(PIC_S_DATA,0xff);
+	outb(PIC_M_DATA,0xf8);
+	outb(PIC_S_DATA,0xbf);
 	put_str("  pic_init done\n");
 }
 

@@ -21,6 +21,7 @@ int prog_a_pid = 0, prog_b_pid = 0;
 
 int main(void){
 	init_all();
+	/*
 	process_execute(u_prog_a, "user_prog_a");
 
 	process_execute(u_prog_b, "user_prog_b");
@@ -28,14 +29,12 @@ int main(void){
 
 	thread_start("k_thread_a", 31, k_thread_a, "A_ ");
 	thread_start("k_thread_b", 31, k_thread_b, "B_ ");
-
-	/*
-	console_put_str("main_pid: 0x");
-	console_put_int(sys_getpid());
-	console_put_char('\n');*/
-
+	
+	
 	intr_enable();
+	*/
 	while(1){
+
 	}
 	return 0;
 }
