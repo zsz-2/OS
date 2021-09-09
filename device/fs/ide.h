@@ -39,5 +39,14 @@ struct ide_channel{
 	struct disk devices[2];
 };
 
+uint8_t channel_cnt; //按照硬盘计算的通道数
+struct ide_channel channels[2]; //有2个ide通道
+
+
+/*分区队列*/
+struct list partition_list;
+
 void ide_init();
+void ide_read(struct disk *hd, uint32_t lba, void *buf, uint32_t sec_cnt);
+void ide_write(struct disk *hd, uint32_t lba, void *buf, uint32_t sec_cnt);
 #endif

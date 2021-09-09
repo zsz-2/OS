@@ -5,7 +5,7 @@ ENTRY_POINT = 0xc0001500
 AS = nasm
 CC = gcc
 LD = ld
-LIB = -I ./lib -I ./lib/kernel -I ./lib/user -I ./device  -I ./kernel -I ./thread -I ./userprog
+LIB = -I ./lib -I ./lib/kernel -I ./lib/user -I ./device  -I ./kernel -I ./thread -I ./userprog -I ./device/fs
 ASFLAGS = -f elf
 CFLAGS = -Wall $(LIB) -m32 -c -fno-builtin -W -Wstrict-prototypes \
 	-Wmissing-prototypes -fno-stack-protector 
@@ -18,7 +18,7 @@ OBJS = $(BUILD_DIR)/main.o  $(BUILD_DIR)/init.o $(BUILD_DIR)/interrupt.o \
 	$(BUILD_DIR)/console.o $(BUILD_DIR)/keyboard.o $(BUILD_DIR)/ioqueue.o\
 	$(BUILD_DIR)/tss.o  $(BUILD_DIR)/process.o $(BUILD_DIR)/syscall-init.o\
 	$(BUILD_DIR)/syscall.o  $(BUILD_DIR)/stdio.o $(BUILD_DIR)/ide.o\
-	$(BUILD_DIR)/std-kernel.o
+	$(BUILD_DIR)/std-kernel.o $(BUILD_DIR)/fs.o
 
 
 #############################  C代码编译 #####################################
@@ -102,8 +102,14 @@ $(BUILD_DIR)/std-kernel.o:./kernel/stdio-kernel.c ./lib/kernel/stdio-kernel.h  .
 		./lib/user/syscall.h
 	$(CC) $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/ide.o: ./device/ide.c  ./device/ide.h  ./lib/kernel/interrupt.h  ./device/timer.h  ./lib/kernel/stdio-kernel.h\
+$(BUILD_DIR)/ide.o: ./device/fs/ide.c  ./device/fs/ide.h  ./lib/kernel/interrupt.h  ./device/timer.h  ./lib/kernel/stdio-kernel.h\
 		./lib/kernel/io.h    ./lib/kernel/global.h  ./lib/stdint.h  ./lib/kernel/bitmap.h   ./thread/sync.h ./lib/kernel/list.h
+	$(CC) $(CFLAGS) $< -o $@
+
+
+$(BUILD_DIR)/fs.o: ./device/fs/fs.c  ./device/fs/ide.h  ./lib/kernel/interrupt.h  ./device/timer.h  ./lib/kernel/stdio-kernel.h\
+		./lib/kernel/io.h    ./lib/kernel/global.h  ./lib/stdint.h  ./lib/kernel/bitmap.h   ./thread/sync.h ./lib/kernel/list.h\
+		./device/fs/super_block.h  ./device/fs/fs.h  ./device/fs/dir.h
 	$(CC) $(CFLAGS) $< -o $@
 
 ############################# 汇编代码编译 ###################################

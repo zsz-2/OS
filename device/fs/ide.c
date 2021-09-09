@@ -1,4 +1,5 @@
 #include "ide.h"
+#include "fs.h"
 #include "interrupt.h"
 #include "timer.h"
 #include "stdio-kernel.h"
@@ -40,8 +41,6 @@
 /*最大可写的扇区数，只针对80MB*/
 #define max_lba (80 * 1024 * 1024)/512 -1 
 
-uint8_t channel_cnt; //按照硬盘计算的通道数
-struct ide_channel channels[2]; //有2个ide通道
 
 /*选择读写的硬盘*/
 static void select_disk(struct disk *hd){
@@ -219,8 +218,6 @@ int32_t ext_lba_base = 0;
 /*记录硬盘主分区和逻辑分区的下标*/
 uint8_t p_no = 0, l_no = 0; 
 
-/*分区队列*/
-struct list partition_list;
 
 /*用来存分区表项*/
 struct partition_table_entry{
@@ -394,6 +391,7 @@ void ide_init(){
 	printk("\n all partition info\n");
 	list_traversal(&partition_list, partition_info, (int)NULL);
 	printk("ide_init done\n");
+
 }
 
 

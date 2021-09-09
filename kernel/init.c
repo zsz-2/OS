@@ -9,6 +9,7 @@
 #include "keyboard.h"
 #include "syscall-init.h"
 #include "ide.h"
+#include "fs.h"
 /*初始化所有模块*/
 void init_all(){
 	put_str("init_all\n");
@@ -23,6 +24,7 @@ void init_all(){
 	enum intr_status old_status =  intr_enable();
 	ide_init();
 	intr_set_status(old_status);
+	filesys_init2();
 }
 
 
