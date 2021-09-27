@@ -310,6 +310,11 @@ void block_desc_init(struct mem_block_desc *desc_array){
 		/*初始化arena中的内存块数量*/
 		desc_array[desc_idx].block_per_arena = (PG_SIZE - sizeof(struct arena)) / block_size;
 	 	list_init(&desc_array[desc_idx].free_list);
+		/*	
+		put_str("block_desc_init   ");
+		put_int((uint32_t)&desc_array[desc_idx].free_list.tail );
+		put_str("\n");
+		*/
 		block_size *= 2;//更新为下一个规格内存块	
 	}
 }
@@ -383,6 +388,14 @@ void* sys_malloc(uint32_t size){
 				break;
 			}
 		}
+		/*
+		put_int(desc_idx);
+		put_str("      ");
+		put_int(size);
+		put_str("\n");
+		list_empty(&descs[desc_idx].free_list);
+		*/
+		//put_str("hahahhahahah\n");
 		/*没有可用的mem_block,创建新的arena提供的mem_block*/
 		if(list_empty(&descs[desc_idx].free_list) == 1){
 			a = malloc_page(PF, 1);
@@ -406,10 +419,8 @@ void* sys_malloc(uint32_t size){
 			}
 			intr_set_status(old_status);
 		}
-		
 		b = elem2entry(struct mem_block, free_elem, list_pop(&(descs[desc_idx].free_list) ));
 		memset(b, 0, descs[desc_idx].block_size);
-
 		a= block2arena(b);
 		a->cnt--;
 		lock_release(&mem_pool->lock);
@@ -533,8 +544,16 @@ void sys_free(void *ptr){
 					ASSERT(elem_find(&a->desc->free_list, &b->free_elem) == 1);
 					list_remove(&b->free_elem);
 				}
+				/*
+				for(int desc_idx = 0; desc_idx < DESC_CNT; ++desc_idx){
+					put_str("block_desc_init   ");
+					put_int((uint32_t)&k_block_descs[desc_idx].free_list.tail );
+					put_str("\n");
+
+				}
+				*/
+				mfree_page(PF, a, 1);
 			}
-			mfree_page(PF, a, 1);
 		}
 		lock_release(&mem_pool->lock);
 	}

@@ -92,16 +92,25 @@ struct list_elem *list_traversal(struct list *plist, function func, int arg){
 /*返回链表的长度*/
 uint32_t list_len(struct list* plist){
 	if(plist == NULL) return 0;
+
 	struct list_elem *elem= plist->head.next;
 	uint32_t length = 0;
+	/*
+	put_str("list_len    ");
+	put_int((uint32_t)&plist->tail);
+	put_str("\n");*/
 	while(elem != &plist->tail){
+		//put_int((uint32_t)elem);
+		//put_str("\n");
 		++length;
 		elem = elem->next;
 	}
+	//put_str("list_len\n");
 	return length;
 }
 
 /*判断链表是否为空，空返回1，非空返回0*/
 int list_empty(struct list *plist){
+	//put_str("list_empty \n");
 	return (list_len(plist) == 0) ? 1: 0;
 }

@@ -18,7 +18,8 @@ OBJS = $(BUILD_DIR)/main.o  $(BUILD_DIR)/init.o $(BUILD_DIR)/interrupt.o \
 	$(BUILD_DIR)/console.o $(BUILD_DIR)/keyboard.o $(BUILD_DIR)/ioqueue.o\
 	$(BUILD_DIR)/tss.o  $(BUILD_DIR)/process.o $(BUILD_DIR)/syscall-init.o\
 	$(BUILD_DIR)/syscall.o  $(BUILD_DIR)/stdio.o $(BUILD_DIR)/ide.o\
-	$(BUILD_DIR)/std-kernel.o $(BUILD_DIR)/fs.o
+	$(BUILD_DIR)/std-kernel.o $(BUILD_DIR)/fs.o $(BUILD_DIR)/ide.o \
+	$(BUILD_DIR)/dir.o  $(BUILD_DIR)/file.o $(BUILD_DIR)/inode.o
 
 
 #############################  C代码编译 #####################################
@@ -111,6 +112,27 @@ $(BUILD_DIR)/fs.o: ./device/fs/fs.c  ./device/fs/ide.h  ./lib/kernel/interrupt.h
 		./lib/kernel/io.h    ./lib/kernel/global.h  ./lib/stdint.h  ./lib/kernel/bitmap.h   ./thread/sync.h ./lib/kernel/list.h\
 		./device/fs/super_block.h  ./device/fs/fs.h  ./device/fs/dir.h
 	$(CC) $(CFLAGS) $< -o $@
+
+
+$(BUILD_DIR)/ide.o: ./device/fs/ide.c  ./device/fs/ide.h  ./lib/kernel/interrupt.h  ./device/timer.h  ./lib/kernel/stdio-kernel.h\
+		./lib/kernel/io.h    ./lib/kernel/global.h  ./lib/stdint.h  ./lib/kernel/bitmap.h   ./thread/sync.h ./lib/kernel/list.h\
+		./device/fs/super_block.h  ./device/fs/fs.h  ./device/fs/dir.h
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILD_DIR)/dir.o: ./device/fs/dir.c ./device/fs/ide.h  ./lib/kernel/interrupt.h  ./device/timer.h  ./lib/kernel/stdio-kernel.h\
+		./lib/kernel/io.h    ./lib/kernel/global.h  ./lib/stdint.h  ./lib/kernel/bitmap.h   ./thread/sync.h ./lib/kernel/list.h\
+		 ./device/fs/super_block.h  ./device/fs/fs.h  ./device/fs/dir.h  
+	$(CC) $(CFLAGS) $< -o $@ 
+
+$(BUILD_DIR)/file.o: ./device/fs/file.c ./device/fs/ide.h  ./lib/kernel/interrupt.h  ./device/timer.h  ./lib/kernel/stdio-kernel.h\
+		./lib/kernel/io.h    ./lib/kernel/global.h  ./lib/stdint.h  ./lib/kernel/bitmap.h   ./thread/sync.h ./lib/kernel/list.h\
+		 ./device/fs/super_block.h  ./device/fs/fs.h  ./device/fs/dir.h
+	$(CC) $(CFLAGS) $< -o $@ 
+
+$(BUILD_DIR)/inode.o: ./device/fs/inode.c ./device/fs/ide.h  ./lib/kernel/interrupt.h  ./device/timer.h  ./lib/kernel/stdio-kernel.h\
+		./lib/kernel/io.h    ./lib/kernel/global.h  ./lib/stdint.h  ./lib/kernel/bitmap.h   ./thread/sync.h ./lib/kernel/list.h\
+		 ./device/fs/super_block.h  ./device/fs/fs.h  ./device/fs/dir.h
+	$(CC) $(CFLAGS) $< -o $@ 
 
 ############################# 汇编代码编译 ###################################
 $(BUILD_DIR)/print.o: ./kernel/print.S 

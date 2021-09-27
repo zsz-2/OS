@@ -1,4 +1,5 @@
 #include "print.h"
+#include "fs.h"
 #include "userprog.h"
 #include "keyboard.h"
 #include "interrupt.h"
@@ -7,6 +8,9 @@
 #include "thread.h"
 #include "syscall.h"
 #include "stdio.h"
+#include "ide.h"
+#include "inode.h"
+#include "super_block.h"
 
 /*
 void consumer_a(void *);
@@ -33,6 +37,12 @@ int main(void){
 	
 	intr_enable();
 	*/
+	printk("------------------------------\n");
+	printk("file1 create start\n");
+	printk("%d\n", cur_part->sb->data_start_lba);
+
+	sys_open("/file1", O_CREAT);
+	printk("over----------\n");
 	while(1){
 
 	}

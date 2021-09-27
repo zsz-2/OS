@@ -286,7 +286,7 @@ static identify_disk(struct disk* hd){
 
 /*扫描硬盘hd中地址位ext_lba的所有分区*/
 static void partition_scan(struct disk *hd, uint32_t ext_lba){
-	//printk("-----------------     %d\n", sizeof(struct boot_sector));
+
 	struct boot_sector *bs = sys_malloc(sizeof(struct boot_sector));
 	ide_read(hd, ext_lba, bs, 1);
 	uint8_t part_idx = 0;
@@ -347,6 +347,7 @@ void ide_init(){
 	ASSERT(hd_cnt > 0);
 	channel_cnt = DIV_ROUND_UP(hd_cnt, 2); //根据硬盘数量反推有几个ide通道
 
+
 	struct ide_channel *channel;
 	uint8_t channel_no = 0;
 	uint8_t dev_no = 0;
@@ -388,6 +389,7 @@ void ide_init(){
 		dev_no = 0;
 		++channel_no;
 	}
+
 	printk("\n all partition info\n");
 	list_traversal(&partition_list, partition_info, (int)NULL);
 	printk("ide_init done\n");

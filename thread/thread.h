@@ -12,6 +12,7 @@
 
 
 #define PG_SIZE 4096
+#define MAX_FILES_OPEN_PER_PROC 8
 
 typedef int16_t pid_t;
 
@@ -87,11 +88,12 @@ struct task_struct{
 	uint8_t priority;      //线程优先级
 	uint8_t ticks; //每次在处理器上执行的时间滴答数
 	uint32_t elapsed_ticks;//从任务执行之后，占用了多少滴答数
+	int32_t fd_table[MAX_FILES_OPEN_PER_PROC]; //文件描述符数组
 	struct list_elem general_tag;  //general_tag的作用是在一般队列上的结点
 	struct list_elem all_list_tag; //线程被加入全部线程队列时使用
 	uint32_t *pgdir; //进程自己页表的虚拟地址
 	char name[16];
-	struct virtual_addr userprog_vaddr;  //用户进程的虚拟地址
+	struct virtual_addr userprog_vaddr;  //用户进程的虚拟地址池
 	struct mem_block_desc u_block_desc[DESC_CNT]; //用户进程内存块描述符
 	uint32_t stack_magic;
 };

@@ -74,6 +74,17 @@ void init_thread(struct task_struct *pthread, char *name, int prio){
 	/*self_kstack是线程自己在内核态下使用的栈顶地址*/
 	pthread->self_kstack = (uint32_t*)((uint32_t)pthread + PG_SIZE);
 	pthread->stack_magic = 0x19990512;
+	/*预留标准输出输出*/
+	pthread->fd_table[0] = 0;
+	pthread->fd_table[1] = 1;
+	pthread->fd_table[2] = 2;
+	/*其余全置为-1*/
+	uint8_t fd_idx = 3;
+	while(fd_idx < MAX_FILES_OPEN_PER_PROC){
+		pthread->fd_table[fd_idx] = -1;
+		++fd_idx;
+	}
+
 }
 
 /*创建一优先级位prio的线程，名为name,线程执行的函数是function(func_arg)*/
