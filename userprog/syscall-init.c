@@ -1,4 +1,5 @@
 #include "thread.h"
+#include "fs.h"
 #include "memory.h"
 #include "string.h"
 #include "stdint.h"
@@ -16,10 +17,12 @@ uint32_t sys_getpid(void){
 	return running_thread()->pid;
 }
 
+/*
 uint32_t sys_write(char *str){
 	console_put_str(str);
 	return strlen(str);
 }
+*/
 
 /*初始化系统调用*/
 void syscall_init(void){

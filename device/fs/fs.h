@@ -15,6 +15,7 @@ enum file_types{
 
 
 void filesys_init();
+int32_t sys_write(int32_t fd, const void *buf, uint32_t count);
 
 /*关于路径解析*/
 #define MAX_PATH_LEN 512
@@ -37,5 +38,11 @@ struct path_search_record{
 
 struct partition *cur_part; //默认情况下操作的是哪个分区
 
+/*文件读写位置偏移量*/
+enum whence{
+	SEEK_SET = 1,
+	SEEK_CUR,
+	SEEK_END
+};
 
 #endif

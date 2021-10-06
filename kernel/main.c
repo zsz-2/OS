@@ -11,6 +11,7 @@
 #include "ide.h"
 #include "inode.h"
 #include "super_block.h"
+#include "dir.h"
 
 /*
 void consumer_a(void *);
@@ -37,15 +38,77 @@ int main(void){
 	
 	intr_enable();
 	*/
-	printk("------------------------------\n");
-	printk("file1 create start\n");
-	printk("%d\n", cur_part->sb->data_start_lba);
 
-	sys_open("/file1", O_CREAT);
-	printk("over----------\n");
-	while(1){
+	//sys_open("/file1", O_CREAT);
 
+	/*
+	uint32_t fd = sys_open("/file1", O_RDWR);
+	printf("fd:%d\n",fd);
+	sys_write(fd,"hello,world\n", 12);
+	sys_close(fd);
+	printk("%d closed now\n", fd);
+	*/
+	
+	/*
+	uint32_t fd = sys_open("/file1", O_RDWR);
+	printk("open /file1, fd: %d\n", fd);
+	char buf[64] = {0};
+	int read_bytes = sys_read(fd, buf, 100);
+	printf("1_read %d bytes:\n%s\n", read_bytes, buf + 25);
+	sys_lseek(fd, 0, SEEK_SET);
+	read_bytes = sys_read(fd, buf, 100);
+	printf("1_read %d bytes:\n%s\n", read_bytes, buf + 25);
+	*/
+	//sys_open("/file1", O_CREAT);
+	//sys_mkdir("/dir1/subdir1");
+
+	
+	//printk("/file1 delete %s!\n", ( (sys_ulink("/file1") == 0) ? : "done" , "fail"));
+	//printk("/file1 delete %d!\n", sys_ulink("/dir1/subdir1/file2") );
+	
+	//int fd = sys_open("/dir1/subdir1/file2", O_CREAT | O_RDWR);
+	//sys_write(fd, "Catch me if you can\n", 21);
+
+	/*
+	struct dir *p_dir = sys_opendir("/dir1/subdir1");
+	if(p_dir){
+		printf("/dir1/subdir1 open done\n");
+		if(sys_closedir(p_dir) == 0){
+			printk("/dir1/subdir1 close done\n");
+		}else{
+			printk("/dir1/subdir1 close fail\n");
+			
+		}
+	}else{
+		printk("/dir1/subdir1 open fail\n");
 	}
+	*/
+	struct dir *p_dir = sys_opendir("/dir1");
+	if(p_dir){
+		printk("/dir1/subdir1 open done!\ncontent:\n");
+		char *type = NULL;
+		struct dir_entry *dir_e = NULL;
+		while((dir_e = sys_readdir(p_dir))){
+			if(dir_e->f_type == FT_REGULAR){
+				type = "regular";
+			}else{
+				type = "directory";
+			}
+			printk("    %s    %s\n", type, dir_e->filename);
+		}
+		if(sys_closedir(p_dir) == 0){
+			printk("/dir1/subdir1 close done\n");
+		}else{
+			printk("/dir1/subdir1 close fail\n");
+		}
+	}else{
+		printk("/dir1/subdir1 open faile\n");
+	}
+	printk("%d\n", cur_part->sb->block_bitmap_lba);
+	printk("%d\n", cur_part->sb->inode_bitmap_lba);
+	printk("%d\n", cur_part->sb->inode_table_lba);
+	printk("%d\n", cur_part->sb->data_start_lba);
+	while(1){}
 	return 0;
 }
 
