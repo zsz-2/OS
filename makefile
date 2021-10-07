@@ -19,7 +19,8 @@ OBJS = $(BUILD_DIR)/main.o  $(BUILD_DIR)/init.o $(BUILD_DIR)/interrupt.o \
 	$(BUILD_DIR)/tss.o  $(BUILD_DIR)/process.o $(BUILD_DIR)/syscall-init.o\
 	$(BUILD_DIR)/syscall.o  $(BUILD_DIR)/stdio.o $(BUILD_DIR)/ide.o\
 	$(BUILD_DIR)/std-kernel.o $(BUILD_DIR)/fs.o $(BUILD_DIR)/ide.o \
-	$(BUILD_DIR)/dir.o  $(BUILD_DIR)/file.o $(BUILD_DIR)/inode.o
+	$(BUILD_DIR)/dir.o  $(BUILD_DIR)/file.o $(BUILD_DIR)/inode.o\
+	$(BUILD_DIR)/fork.o
 
 
 #############################  C代码编译 #####################################
@@ -86,6 +87,10 @@ $(BUILD_DIR)/tss.o: ./userprog/tss.c  ./userprog/tss.h  ./lib/kernel/global.h\
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/process.o: ./userprog/process.c  ./userprog/tss.h  ./userprog/userprog.h ./lib/kernel/global.h\
+		./lib/stdint.h ./thread/thread.h  ./lib/kernel/list.h  ./lib/kernel/io.h
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILD_DIR)/fork.o: ./userprog/fork.c  ./userprog/process.c  ./userprog/tss.h  ./userprog/userprog.h ./lib/kernel/global.h\
 		./lib/stdint.h ./thread/thread.h  ./lib/kernel/list.h  ./lib/kernel/io.h
 	$(CC) $(CFLAGS) $< -o $@
 

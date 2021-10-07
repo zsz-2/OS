@@ -95,10 +95,16 @@ struct task_struct{
 	char name[16];
 	struct virtual_addr userprog_vaddr;  //用户进程的虚拟地址池
 	struct mem_block_desc u_block_desc[DESC_CNT]; //用户进程内存块描述符
+	uint32_t cwd_inode_nr; //进程所在的工作目录的inode编号
+	int16_t parent_pid;
 	uint32_t stack_magic;
 };
 
 
 void thread_init(void);
 struct task_struct *running_thread();
+
+struct list thread_ready_list; //就绪队列
+struct list thread_all_list; //所有任务队列
+
 #endif

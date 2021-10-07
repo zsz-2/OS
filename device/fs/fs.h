@@ -45,4 +45,11 @@ enum whence{
 	SEEK_END
 };
 
+/*文件属性结构体*/
+struct stat{
+	uint32_t st_ino; //inode编号
+	uint32_t st_size; //尺寸
+	enum file_types st_filetype; //文件类型
+};
+
 #endif

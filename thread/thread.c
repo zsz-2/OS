@@ -14,8 +14,6 @@
 
 struct task_struct *main_thread; //主线程PCB
 struct task_struct *idle_thread; //idle线程
-struct list thread_ready_list; //就绪队列
-struct list thread_all_list; //所有任务队列
 static struct list_elem* thread_tag; //用于保存队列中的线程结点
 
 extern void switch_to(struct task_struct *curr, struct task_struct *next);
@@ -29,6 +27,10 @@ static pid_t allocate_pid(void){
 	next_pid++;
 	lock_release(&pid_lock);
 	return next_pid;
+}
+
+pid_t fork_pid(void){
+	return allocate_pid();
 }
 
 /*获取PCB指针*/
@@ -73,6 +75,8 @@ void init_thread(struct task_struct *pthread, char *name, int prio){
 	pthread->pgdir = NULL;
 	/*self_kstack是线程自己在内核态下使用的栈顶地址*/
 	pthread->self_kstack = (uint32_t*)((uint32_t)pthread + PG_SIZE);
+	pthread->cwd_inode_nr = 0; //以根目录作为默认工作路径
+	pthread->parent_pid = -1; //使任务的父进程默认为-1
 	pthread->stack_magic = 0x19990512;
 	/*预留标准输出输出*/
 	pthread->fd_table[0] = 0;
@@ -194,11 +198,13 @@ static void idle(void *arg){
 	}
 }
 
+extern void init(void);
 void thread_init(){
 	put_str("thread_init  start\n");
 	list_init(&thread_ready_list);
 	list_init(&thread_all_list);
 	lock_init(&pid_lock);
+	process_execute(init, "init");
 	make_main_thread();
 	idle_thread = thread_start("idle", 10, idle, NULL);
 	put_str("thread_init done\n");

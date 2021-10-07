@@ -66,6 +66,7 @@ void inode_sync(struct partition *part, struct inode *inode, void *io_buf){
 	pure_inode.write_deny = false;
 	pure_inode.inode_tag.prev = pure_inode.inode_tag.next = NULL;
 
+
 	char *inode_buf = (char *)io_buf;
 	if(inode_pos.two_sec){
 		//若是跨越了两个扇区，就读出两个扇区，再写两个扇区
@@ -152,7 +153,7 @@ void inode_init(uint32_t inode_no, struct inode *new_inode){
 	new_inode->write_deny = false;
 
 	/*初始化索引数组i_sector*/
-	uint8_t sec_idx;
+	uint8_t sec_idx = 0;
 	while(sec_idx < 13){
 		new_inode->i_sectors[sec_idx] =  0;
 		++sec_idx;
